@@ -40,11 +40,15 @@ import static tuwien.auto.calimero.knxnetip.KNXnetIPConnection.BlockingMode.Wait
 import static tuwien.auto.calimero.knxnetip.KNXnetIPConnection.BlockingMode.WaitForCon;
 import static tuwien.auto.calimero.knxnetip.KNXnetIPTunnel.TunnelingLayer.LinkLayer;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Optional;
 
 import tuwien.auto.calimero.FrameEvent;
 import tuwien.auto.calimero.KNXAddress;
@@ -185,13 +189,17 @@ public class KNXNetworkLinkIP extends AbstractLink
 		switch (serviceMode) {
 		case TUNNELING:
 			InetSocketAddress local = localEP;
-			if (local == null)
+			if (local == null) {
 				try {
-					local = new InetSocketAddress(InetAddress.getLocalHost(), 0);
+					final InetAddress addr = useNAT ? null /* InetAddress.getLocalHost() */
+							: Optional.ofNullable(remoteEP.getAddress()).flatMap(this::onSameSubnet)
+									.orElse(InetAddress.getLocalHost());
+					local = new InetSocketAddress(addr, 0);
 				}
 				catch (final UnknownHostException e) {
-					throw new KNXException("no local host available");
+					throw new KNXException("no local host address available", e);
 				}
+			}
 			conn = new KNXnetIPTunnel(LinkLayer, local, remoteEP, useNAT);
 			break;
 		case ROUTING:
@@ -300,5 +308,31 @@ public class KNXNetworkLinkIP extends AbstractLink
 		if (p > 0)
 			return host + ":" + p;
 		return host;
+	}
+
+	// finds a local IPv4 address with its network prefix "matching" the remote address
+	private Optional<InetAddress> onSameSubnet(final InetAddress remote)
+	{
+		try {
+			return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
+					.flatMap(ni -> ni.getInterfaceAddresses().stream())
+					.filter(ia -> ia.getAddress() instanceof Inet4Address)
+					.peek(ia -> logger.trace("match local address {}/{} to {}", ia.getAddress(),
+							ia.getNetworkPrefixLength(), remote))
+					.filter(ia -> matchesPrefix(ia, remote)).map(ia -> ia.getAddress()).findFirst();
+		}
+		catch (final SocketException ignore) {}
+		return Optional.empty();
+	}
+
+	static boolean matchesPrefix(final InterfaceAddress ia, final InetAddress remote)
+	{
+		final byte[] a1 = ia.getAddress().getAddress();
+		final byte[] a2 = remote.getAddress();
+		final long mask = (0xffffffffL >> ia.getNetworkPrefixLength()) ^ 0xffffffffL;
+		for (int i = 0; i < a1.length; i++)
+			if ((a1[i] & (mask >> (24 - 8 * i))) != (a2[i] & (mask >> (24 - 8 * i))))
+				return false;
+		return true;
 	}
 }
