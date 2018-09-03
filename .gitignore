@@ -7,6 +7,8 @@
 *.ear
 /.settings
 /.classpath
+/out
+/gradle
 
 /doc
 /target/
