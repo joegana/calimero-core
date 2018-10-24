@@ -433,12 +433,12 @@ public class Discoverer
 				else
 					try {
 //						final boolean skipLinkLocal = false;
+						if (a.isLoopbackAddress()) {
+							lo = true;
+						}
 						if (!(lo && a.isLoopbackAddress())) {
 //							if (!(a.isLinkLocalAddress() && skipLinkLocal))
 							rcv.add(search(a, port, ni, timeout));
-						}
-						if (a.isLoopbackAddress()) {
-							lo = true;
 						}
 					}
 					catch (KNXException | RuntimeException e) {
