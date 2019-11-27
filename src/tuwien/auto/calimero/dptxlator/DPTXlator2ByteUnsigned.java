@@ -1,6 +1,6 @@
 /*
     Calimero 2 - A library for KNX network access
-    Copyright (c) 2006, 2016 B. Malinowsky
+    Copyright (c) 2006, 2019 B. Malinowsky
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,6 @@
 
 package tuwien.auto.calimero.dptxlator;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import tuwien.auto.calimero.KNXFormatException;
@@ -98,8 +97,7 @@ public class DPTXlator2ByteUnsigned extends DPTXlator
 		new DPT("7.006", "Time period in minutes", "0", "65535", "min");
 
 	/**
-	 * DPT ID 7.007, Time period in hours; values from <b>0</b> to <b>65535</b> h (~7,4
-	 * years).
+	 * DPT ID 7.007, Time period in hours; values from <b>0</b> to <b>65535</b> h (~7,4 years).
 	 */
 	public static final DPT DPT_TIMEPERIOD_HOURS =
 		new DPT("7.007", "Time period in hours", "0", "65535", "h");
@@ -130,28 +128,18 @@ public class DPTXlator2ByteUnsigned extends DPTXlator
 	 * Note: the unit of measure symbol used here is "lx", and not "Lux" as originally
 	 * proposed for this DPT.
 	 */
-	public static final DPT DPT_BRIGHTNESS =
-		new DPT("7.013", "Brightness", "0", "65535", "lx");
+	public static final DPT DPT_BRIGHTNESS = new DPT("7.013", "Brightness", "0", "65535", "lx");
 
-	private static final Map<String, DPT> types;
+	/**
+	 * DPT ID 7.600, Absolute color temperature (Kelvin); values from <b>0</b> to <b>65535</b> K.
+	 */
+	public static final DPT DPT_ABSOLUTE_COLOR_TEMPERATURE = new DPT("7.600", "Absolute color temperature", "0", "65535", "K");
+
+
+	private static final Map<String, DPT> types  = loadDatapointTypes(DPTXlator2ByteUnsigned.class);
 
 	private final int min;
 	private final int max;
-
-	static {
-		types = new HashMap<>(15);
-		types.put(DPT_VALUE_2_UCOUNT.getID(), DPT_VALUE_2_UCOUNT);
-		types.put(DPT_PROP_DATATYPE.getID(), DPT_PROP_DATATYPE);
-		types.put(DPT_TIMEPERIOD.getID(), DPT_TIMEPERIOD);
-		types.put(DPT_TIMEPERIOD_10.getID(), DPT_TIMEPERIOD_10);
-		types.put(DPT_TIMEPERIOD_100.getID(), DPT_TIMEPERIOD_100);
-		types.put(DPT_TIMEPERIOD_SEC.getID(), DPT_TIMEPERIOD_SEC);
-		types.put(DPT_TIMEPERIOD_MIN.getID(), DPT_TIMEPERIOD_MIN);
-		types.put(DPT_TIMEPERIOD_HOURS.getID(), DPT_TIMEPERIOD_HOURS);
-		types.put(DPT_LENGTH.getID(), DPT_LENGTH);
-		types.put(DPT_ELECTRICAL_CURRENT.getID(), DPT_ELECTRICAL_CURRENT);
-		types.put(DPT_BRIGHTNESS.getID(), DPT_BRIGHTNESS);
-	}
 
 	/**
 	 * Creates a translator for the given datapoint type.
