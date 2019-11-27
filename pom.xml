@@ -28,6 +28,7 @@
 	<properties>
 		<exec.mainClass>tuwien.auto.calimero.Settings</exec.mainClass>
 		<test.exclude.groups></test.exclude.groups>
+		<skipTests>true</skipTests>
 	</properties>
 	<build>
 		<plugins>
@@ -62,6 +63,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+				    <skipTests>${skipTests}</skipTests>
 					<useFile>false</useFile>
 					<excludedGroups>${test.exclude.groups}</excludedGroups>
 					<includes>
